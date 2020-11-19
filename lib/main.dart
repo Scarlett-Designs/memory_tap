@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart';
 import 'dart:async' show Timer;
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp( MaterialApp(
     home: LandingPage(),
+    debugShowCheckedModeBanner: false,
     theme: ThemeData(
       textTheme: TextTheme(
         headline2: TextStyle(fontSize: 30.0,color:Colors.black54),
@@ -24,44 +26,50 @@ class LandingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //device orientation is set to portrait only
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Container(
-              child: Shimmer.fromColors(
-                highlightColor: Colors.tealAccent,
-                baseColor: Colors.teal,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text('Memory Tap', style: Theme.of(context).textTheme.headline4),
-                    Image.asset(
-                      'assets/images/logo2.png',
-                    ),
-                    SizedBox(height: 10.0,),
-                    Text('The fun is just beginning', style: Theme.of(context).textTheme.headline6),
-                    SizedBox(height: 80),
-                  ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                child: Shimmer.fromColors(
+                  highlightColor: Colors.tealAccent,
+                  baseColor: Colors.teal,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text('Memory Tap', style: Theme.of(context).textTheme.headline4),
+                      Image.asset(
+                        'assets/images/logo2.png',
+                      ),
+                      SizedBox(height: 10.0,),
+                      Text('The fun is just beginning', style: Theme.of(context).textTheme.headline6),
+                      SizedBox(height: 80),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Container(
-              child:Stack(
-                children: [
-                  ButtonGame(),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Text('Play', style: Theme.of(context).textTheme.headline5),
+              Container(
+                child:Stack(
+                  children: [
+                    ButtonGame(),
+                    Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Text('Play', style: Theme.of(context).textTheme.headline5),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            )
-          ],
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -163,11 +171,9 @@ class _GameState extends State<Game> {
                             } else {
                               cardFlips[previousIndex] = false;
                               cardFlips[index] = false;
-                              print(cardFlips);
 
                               if (cardFlips.every((t) => t == false)) {
                                 end = true;
-                                print("Won");
                                 showResult();
                               }
                             }
@@ -217,11 +223,18 @@ class _GameState extends State<Game> {
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         title: Center(child: Text("You won!", style: Theme.of(context).textTheme.headline4)),
-        content: Center(
-          child: Column(
+        content: Container(
+          height: 45,
+          child: Center(
+            child: SizedBox(height: 30,
+            child: Text("Score: $time", style: Theme.of(context).textTheme.headline2),),
+          ),
+        ),
+        actions: <Widget>[
+          Column(
             children: [
               Container(
-                height: 300,
+                height: 200,
                 width: double.maxFinite,
                 decoration: BoxDecoration(
                   image: DecorationImage(
@@ -229,16 +242,9 @@ class _GameState extends State<Game> {
                       fit: BoxFit.fill),
                 ),
               ),
-              Text("Score: $time", style: Theme.of(context).textTheme.headline2)
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          Column(
-            children: [
               Stack(
                 children: [
-                  ButtonModalGame(),
+                  ButtonGame(),
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
@@ -250,7 +256,7 @@ class _GameState extends State<Game> {
               SizedBox(height: 10),
               Stack(
                 children: [
-                  ButtonModalHome(),
+                  ButtonHome(),
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.all(10.0),
@@ -258,7 +264,8 @@ class _GameState extends State<Game> {
                     ),
                   ),
                 ],
-              )
+              ),
+              SizedBox(height: 30),
             ],
           ),
         ],
@@ -280,6 +287,7 @@ class ButtonGame extends StatelessWidget{
           minWidth: double.maxFinite,
           child: RaisedButton(
             onPressed: () {
+              end = false;
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => Game(
@@ -304,60 +312,6 @@ class ButtonHome extends StatelessWidget{
       child: Container(
         height: 45,
         margin: EdgeInsets.fromLTRB(55, 0, 55, 0),
-        child: ButtonTheme(
-          minWidth: double.maxFinite,
-          child: RaisedButton(
-            onPressed: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => LandingPage(),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ButtonModalGame extends StatelessWidget{
-  @override
-  Widget build(BuildContext context){
-    return Shimmer.fromColors(
-      highlightColor: Colors.tealAccent,
-      baseColor: Colors.teal,
-      child: Container(
-        height: 45,
-        margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
-        child: ButtonTheme(
-          minWidth: double.maxFinite,
-          child: RaisedButton(
-            onPressed: () {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => Game(
-                    size: 12,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class ButtonModalHome extends StatelessWidget{
-  @override
-  Widget build(BuildContext context){
-    return Shimmer.fromColors(
-      highlightColor: Colors.tealAccent,
-      baseColor: Colors.teal,
-      child: Container(
-        height: 45,
-        margin: EdgeInsets.fromLTRB(5, 0, 5, 0),
         child: ButtonTheme(
           minWidth: double.maxFinite,
           child: RaisedButton(
